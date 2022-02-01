@@ -1,14 +1,24 @@
 require 'json'
+require './lib/word_list_builder.rb'
 
-def create_word_list
-  begin
-    word_list_file = File.open("word_list.json")
-  rescue
-    require './lib/word_list_builder.rb'
-    word_list_file = File.open("word_list.json")
+class WordList
+  def self.load
+    begin
+      word_list_file = self.open
+    rescue
+      WordListBuilder.build
+      word_list_file = self.open
+    end
+    JSON.parse(word_list_file.read)
   end
-  puts "Word list created!"
-  JSON.parse(word_list_file.read)
+
+  def self.open
+    File.open("word_list.json")
+  end
+
+  def self.select_word
+    self.load.sample
+  end
 end
 
 def display_correct_guesses
@@ -21,19 +31,18 @@ def display_correct_guesses
     end
   end
    
-  "Correct guesses: '#{display.join(' ')}.'"
+  "Correct guesses: #{display.join(' ')}"
 end
 
 def display_incorrect_guesses
-  "Incorrect guesses: '#{$incorrect_guesses.join(', ')}.'"
+  "Incorrect guesses: #{$incorrect_guesses.join(', ')}"
 end
 
 def word_guessed?
   WORD.chars.all? { |char| $correct_guesses.include?(char)}
 end
 
-word_list = create_word_list
-WORD = word_list.sample
+WORD = WordList.select_word
 puts "The word for this game is '#{WORD}'."
 
 $correct_guesses = []
@@ -53,6 +62,5 @@ until word_guessed? || $incorrect_guesses.length == 6
   
   puts display_correct_guesses
   puts display_incorrect_guesses
-  p word_guessed?
 end
 
