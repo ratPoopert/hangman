@@ -9,6 +9,8 @@ class WordList
   MIN_WORD_LENGTH = 5
   MAX_WORD_LENGTH = 12
 
+  # Parse the existing Word List JSON file, or create one if it
+  # does not already exist.
   def self.import
     JSON.parse(File.read(FILE_NAME))
   rescue StandardError
@@ -16,19 +18,23 @@ class WordList
     JSON.parse(File.read(FILE_NAME))
   end
 
+  # Create a new Word List JSON file by filtering a Dictionary
+  # object.
   def self.export
-    File.write FILE_NAME, JSON.dump(Dictionary.import)
+    File.write FILE_NAME, JSON.dump(filter_dictionary)
   end
 
-  def self.filter
-    import.select do |word|
+  # Filter the words in a dictionary by length Dictionary.
+  def self.filter_dictionary(dictionary = Dictionary.import)
+    dictionary.select do |word|
       word.length.between?(MIN_WORD_LENGTH, MAX_WORD_LENGTH)
     end
   end
 
+  # Select a random word from an existing Word List.
   def self.select_word
-    filter.sample.downcase
+    import.sample.downcase
   end
 
-  private_class_method :import, :export, :filter
+  private_class_method :import, :export, :filter_dictionary
 end
